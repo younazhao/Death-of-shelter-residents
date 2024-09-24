@@ -33,6 +33,7 @@ data <- filter(datastore_resources, row_number() == 1) |>
 
 
 #### Save data ####
+
 write_csv(data, "data/raw_data/shelter_data.csv") 
 
          
