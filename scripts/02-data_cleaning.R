@@ -29,7 +29,8 @@ cleaned_data <- cleaned_data |>
     month,
     total_decedents,
     male,
-    female
+    female,
+    transgender_non_binary_two_spirit
   )
 
 # Rename to add in more specific information
@@ -37,7 +38,8 @@ cleaned_data <-  cleaned_data |>
   rename(
     total_deaths = total_decedents,
     male_decedents = male,
-    female_decedents = female
+    female_decedents = female,
+    others = transgender_non_binary_two_spirit
   )
 
 # Change the format of the variable corresponding to our simulated dataset
