@@ -2,12 +2,13 @@
 title: "Comparison of Toronto Number of Deaths of Shelter Residents before COVID-19 and after COVID-19"
 author: 
   - Wen Han Zhao
+thanks: "A GitHub Repository containing all data, R code, and other files used in this investigation is located here: <https://github.com/younazhao/Death-of-shelter-residents.git>"
 date: 24 September 2024
 date-format: long
-abstract: "In this report, Toronto Number of Deaths of Shelter Residents is analyzed from January 2007 to August 2024. By comparing pre-pandemic and post-pandemic mortality data, the research aims to identify any significant trend and changes in the health outcomes of this vulnerable population.The findings will contribute to understanding the pandemic’s effects on homeless populations and inform future public health interventions in shelter environments."
-
+abstract: "In this report, Toronto's Number of Deaths of Shelter Residents is analyzed from January 2007 to August 2024. The Coronavirus pandemic started in 2019 and has caused an outbreak globally. By comparing before and after COVID-19, this research aims to identify any significant trend and changes in deaths among Toronto shelter residents. The findings will contribute to future precautions by understanding the effects of COVID-19 on shelter's residents and inform public health organizations in shelter's environments."
 format: pdf
 number-sections: true
+toc: true
 bibliography: references.bib
 ---
 
@@ -16,11 +17,79 @@ bibliography: references.bib
 #| warning: false
 #| message: false
 
+#### Preamble ####
+# Purpose: Generate the paper pdf for comparison of Toronto Number of Deaths of Shelter Residents
+# Author: Wen Han Zhao
+# Date: 24 September 2024
+# Contact: youna.zhao@mail.utoronto.ca
+# License: MIT
+# Pre-requisites: Run the files "01-download_data.R" and "02-data_cleaning.R
+```
+
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
 # Workspace Setup
+
+#install.packages("kableExtra")
+
+library(ggplot2)
 library(tidyverse)
+library(scales)
+library(knitr)
+library(kableExtra)
 
 ```
 
+
+# Introduction {#sec-introduction}
+
+According to World Health Organization, COVID-19 pandemic was first detected in China in December 2019 @who_covid19 and spread rapidly to other countries. In 30 January 2020, WHO has declared Public Health Emergency of International Concern on coronavirus. As worldwide governments imposed lockdowns and protection measures to avoid the spreading of the virus, shelter's residents have been a population of high risk during this difficult time. As June of 2023, over 4 million cases of COVID-19 were reported in Canada and causing nearly 40,000 deaths @ccdr2024_wastewater. People experiencing homelessness are more susceptible to COVID-19 infections due to inaccessibility to healthcare, overcrowded living conditions, and lack of protection measures. 
+
+The shelter's residents living environment, interaction with others, and accessibility to resources can increase their chance of exposing to the virus. The shelters' condition has a high density of people, which is difficult to practice social distancing. In addition, poor ventilation and insufficient infection control accelerated the spread of COVID-19 among shelter's residents. The Canadian government has imposed a wastewater surveillance strategy to detect the presence of any virus. Hopefully with the help of this analysis, the government could develop more strategy to prevent future outbreak and access to more public resources. 
+
+To do this, Toronto Number's of Death of Shelter Residents from 2007 to 2024 was analyzed in @sec-data. The provided dataset from Toronto Public Health has shown a significant increase in trend near October of 2021 and has spiked to a maximum of total 19 deaths. Section 3 @sec-discussion focus on the weakness of this study and further possible improvements. Lastly, Section 4 @sec-appendix contains several steps performed on the raw data. 
+
+\pagebreak
+
+# Data {#sec-data}
+
+## Cleaned Data {#sec-data-cleaned_data}
+
+" Deaths of Shelter Residents" is a dataset on Toronto Open Data @citeOpenDataToronto that provides monthly records of deaths of Toronto shelters' residents. Toronto Public Health started to track this data since January of 2007 until now. The dataset categorizes death by gender, and transgender/Non-binary/Two-spirit @citeOpenDataToronto. In addition, I have included a new column of date for graphing purpose and classify Transgender/Non-binary/Two-spirit as other. @tbl-description contained a detailed description of the dataset and variables. 
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| label: tbl-description
+#| tbl-cap: "Dataset descriptions of the analysis data"
+
+# Build a table to explain the cleaned dataset and each variable.
+table_description <- tibble(
+  Column = c("Year", "Month", "Total_Deaths", "Male_Deaths", "Female_Deaths", "Others", "Date"),
+  Description = c(
+    "The calendar year being reported on.",
+    "The month being reported on.",
+    "The total number of shelter residents who died in the reported month/year.",
+    "The total number of male shelter residents who died in the reported month/year.",
+    "The total number of female shelter residents who died in the reported month/year.",
+    "The total number of Transgender, non-binary, and Two-Spirit shelter residents who died in the       reported month/year.",
+    "Date combined Year and Month and adding in the 1st day of the month"
+  )
+)
+
+# Draw the table with a caption
+kable(table_description, col.names = c("Variables", "Descriptions")) |>
+  kable_styling(latex_options = c("striped", "hold_position"))
+```
+
+## Overview {#sec-data-overview}
+
+Using the R programming language @citeR, the packages `janitor` @citejanitor and `tidyverse` @citetidyverse packages were used to simulate and testing the dataset. The dataset was download from Toronto Public Health by using `opendatatoronto` @citeOpenDataToronto and `tidyverse` @citetidyverse. The pacakages `janitor` @citejanitor and `tidyverse` @citetidyverse were used to clean the raw dataset and `lubridate` @citelubridate `dplyr` @citedplyr were used to create new variables. Lastly, the packages `tidyverse` @citetidyverse were used to perform tests on the clean dataset. `ggplot2` @citeggplot2 were used to generate plots for the report. `scales` @citeScales, `knitr` @citeKnitr, and `kableExtra` @citeKableExtra were used to generate tables and formatting. 
 
 ```{r}
 #| echo: false
@@ -32,114 +101,161 @@ data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
 ```
 
 
-# Introduction
+## Results {#sec-data-results}
 
-The COVID-19 pandemic, which emerged in late 2019 and escalated globally in early 2020, brought unprecedented challenges to public health systems, economies, and vulnerable populations. As governments worldwide imposed lockdowns and implemented social distancing measures to curb the virus's spread, homeless populations, including shelter residents, faced heightened risks. Overcrowded living conditions, limited access to healthcare, and underlying health issues made shelter residents particularly susceptible to COVID-19 infections. In Toronto, the pandemic raised concerns about the potential for an increased number of deaths among shelter residents, driven by both direct infection and the pandemic's broader social and economic impacts. This study seeks to analyze whether the number of deaths among shelter residents in Toronto increased significantly during the pandemic compared to the pre-pandemic period.
+After loading the dataset using the R programming language @citeR and ggplot2 @citeggplot2, and tidyverse @citetidyverse package was used to generate graphs. In doing so, R code was adapted from @rohan.
 
-# Overview
-
-The "Deaths of Shelter Residents" dataset from Toronto Open Data provides annual records of deaths among individuals living in Toronto's homeless shelters. It includes data on the total number of deaths, broken down by year, from 2007 to the most recent available data. The dataset also categorizes deaths by gender. Additionally, it may include monthly data, allowing for a more granular analysis of trends over time. This dataset is useful for tracking mortality patterns among shelter residents and identifying any significant changes, such as an increase in deaths during the COVID-19 pandemic.
-
-# Data
-
-After loading the dataset using the R programming language (R Core Team 2022) and the here package (Müller 2020), the tidyverse (Wickham et al. 2019) package was used to generate graphs. In doing so, R code was adapted from Alexander (2024).
+\pagebreak 
 
 ```{r}
 #| label: fig-deaths
 #| fig-cap: Deaths of shelter residents over time
 #| echo: false
+#| message: false
 
-ggplot(data = data, aes(x = data$date, y = data$total_deaths)) +
+# Find the maximum point on the graph
+max_date <- data$date[which.max(data$total_deaths)]
+max_total_deaths <- max(data$total_deaths, na.rm = TRUE)
+
+# Plotting the graph of total deaths
+ggplot(data = data, aes(x = date, y = total_deaths)) +
   geom_line() + 
-  geom_smooth() +
+  geom_smooth(method = "loess") +
   labs(
     title = "Total Deaths of Toronto Shelter Residents from 2007 to 2024",
     x = "Date",
     y = "Total Deaths"
   ) +
-  theme_minimal()
+  theme_classic() +
+    geom_point(aes(x = max_date, y = max_total_deaths), color = "red", size = 3) +
+  annotate("text", x = max_date, y = max_total_deaths, 
+           label = paste("Max:", max_total_deaths), 
+           vjust = -1.2, color = "red", size = 4) +
+  annotate("text", x = max_date, y = min(data$total_deaths), 
+           label = paste("Date:", max_date), 
+           vjust = 1.2, color = "blue", size = 4) +
+  geom_vline(xintercept = as.numeric(max_date), linetype = "dotted", color = "grey", linewidth = 0.5) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme(
+    plot.title = element_text(size = 12),
+    axis.title = element_text(size = 10),  
+    axis.text = element_text(size = 8)    
+  ) +
+  coord_cartesian(clip = "off")
 ```
 
-The graph illustrates the total number of deaths among Toronto shelter residents from 2007 to 2024, showing an increasing trend over time. Key observations include:
+The above graph illustrates the total number of deaths among Toronto shelter residents from January 2007 to August 2024. We could see a clear increasing trend over time and some cyclic observation across months and years. We could splipt the data in several phase. The 1st phase is from 2007 to 2015, where the number of deaths fluctuated but we the trendline (blue line) remain flat. Nearly all observations are under 5 with some spontaneous spikes. The 2nd phase starts around 2015 to 2020, where the frequency and magnitude of death amounts began to rise. This slowly increase could be affected by the rising of living expense in Toronto, causing the numbers of homeless to increase and therefore total deaths to increase. From 2020 to 2022, a sharp increase is noticeable from the graph, which corresponds to the COVID-19 pandemic. The numbers of deaths spikes significantly during this period almost reaching to 10-15 deaths per months. It has reached the maximum of 19 deaths in October 2021. This part suggest how COVID-19 has impacted the shelter residents enormously in Toronto. The 3rd phase is post 2022 which followed the pandemic's peak. The death numbers of residents shelter became more volatile but the trendline still shows a upward increasing trend. There are several small peaks during this phase but have decreased more than during pandemic. 
 
-Early Years (2007–2015): The number of deaths fluctuated relatively mildly, generally remaining below five deaths per reporting period, with some sporadic spikes.
+From the trendline (blue line), we can observed an upward increasing trend with an acceleration during the pandemic period. This further aligns with our hypothesis where COVID-19 has significantly impacted mortality rate in shelter residents. 
 
-2015–2020: Starting around 2015, the frequency and magnitude of death counts began to rise, indicating an upward trend. The gradual increase suggests that factors affecting shelter residents' health, such as access to care or living conditions, may have started to worsen even before the pandemic.
-
-COVID-19 Period (2020 onwards): The most notable trend is the sharp increase in deaths from 2020 onwards, which corresponds with the COVID-19 pandemic. The number of deaths spikes significantly during this period, reaching highs of 10–15 deaths in some months, suggesting a strong impact of the pandemic on shelter residents.
-
-Post-2022: Following the pandemic's peak, death numbers show a more volatile pattern, but the overall trend remains elevated compared to the pre-pandemic years, with a generally higher baseline.
-
-The trendline (blue line) further confirms the long-term upward trajectory, with an acceleration in death counts from 2020, likely driven by pandemic-related factors such as increased health risks, inadequate shelter conditions, or reduced access to healthcare during the pandemic. The shading around the line shows the confidence interval, which suggests that the pattern observed is statistically significant.
-
-This graphical analysis highlights a considerable increase in deaths among shelter residents during and following the COVID-19 pandemic, aligning with the hypothesis that the pandemic significantly impacted mortality in this population.
-Total Deaths of Toronto Male Shlter Residents from 2007 to 2024.
+\pagebreak
 
 ```{r}
 #| label: fig-male_decedents
 #| fig-cap: Deaths of male shelter residents over time
 #| echo: false
+#| message: false
 
-ggplot(data = data, aes(x = data$date, y = data$male_decedents)) +
+# Find the maximum point on the graph
+max_male_date <- data$date[which.max(data$male_decedents)]
+max_male_deaths <- max(data$male_decedents, na.rm = TRUE)
+
+# Plotting the graph of total deaths
+ggplot(data = data, aes(x = date, y = male_decedents)) +
   geom_line() + 
-  geom_smooth() +
+  geom_smooth(method = "loess") +
   labs(
-    title = "Total Deaths of Toronto Male Shelter Residents from 2007 to 2024",
+    title = "Total Deaths of Toronto Shelter Male Residents from 2007 to 2024",
     x = "Date",
-    y = "Total Male Decedents"
+    y = "Total Deaths"
   ) +
-  theme_minimal()
-
+  theme_classic() +
+    geom_point(aes(x = max_male_date, y = max_male_deaths), color = "red", size = 3) +
+  annotate("text", x = max_male_date, y = max_male_deaths, 
+           label = paste("Max:", max_male_deaths), 
+           vjust = -1.2, color = "red", size = 4) +
+  annotate("text", x = max_male_date, y = min(data$total_deaths), 
+           label = paste("Date:", max_male_date), 
+           vjust = 1.2, color = "blue", size = 4) +
+  geom_vline(xintercept = as.numeric(max_male_date), linetype = "dotted", color = "grey", linewidth = 0.5) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme(
+    plot.title = element_text(size = 12),
+    axis.title = element_text(size = 10),  
+    axis.text = element_text(size = 8)    
+  ) +
+  coord_cartesian(clip = "off")
 ```
-
-The graph illustrates the total number of deaths among Toronto male shelter residents from 2007 to 2024, showing an increasing trend over time. Key observations include:
-
-The overall graph has similar pattern to the total numbers of deaths and it has spiked significantly in 2022. We could also spot a recurring trend in some of the months of a year, which could be interesting to analysis. 
-
-The trendline (blue line) further confirms the long-term upward trajectory, with an acceleration in death counts from 2020, likely driven by pandemic-related factors such as increased health risks, inadequate shelter conditions, or reduced access to healthcare during the pandemic. The shading around the line shows the confidence interval, which suggests that the pattern observed is statistically significant.
-
-This graphical analysis highlights a considerable increase in deaths among shelter residents during and following the COVID-19 pandemic, aligning with the hypothesis that the pandemic significantly impacted mortality in this population.
-Total Deaths of Toronto Male Shlter Residents from 2007 to 2024.
 
 ```{r}
 #| label: fig-female_decedents
 #| fig-cap: Deaths of female shelter residents over time
 #| echo: false
+#| message: false
 
-ggplot(data = data, aes(x = data$date, y = data$female_decedents)) +
+# Find the maximum point on the graph
+max_female_date <- data$date[which.max(data$female_decedents)]
+max_female_deaths <- max(data$female_decedents, na.rm = TRUE)
+
+# Plotting the graph of total deaths
+ggplot(data = data, aes(x = date, y = female_decedents)) +
   geom_line() + 
-  geom_smooth() +
+  geom_smooth(method = "loess") +
   labs(
-    title = "Total Deaths of Toronto Female Shelter Residents from 2007 to 2024",
+    title = "Total Deaths of Toronto Shelter Female Residents from 2007 to 2024",
     x = "Date",
-    y = "Total Female Decedents"
+    y = "Total Deaths"
   ) +
-  theme_minimal()
+  theme_classic() +
+    geom_point(aes(x = max_female_date, y = max_female_deaths), color = "red", size = 3) +
+  annotate("text", x = max_female_date, y = max_female_deaths, 
+           label = paste("Max:", max_female_deaths), 
+           vjust = -1.2, color = "red", size = 4) +
+  annotate("text", x = max_female_date, y = min(data$total_deaths), 
+           label = paste("Date:", max_female_date), 
+           vjust = 1.2, color = "blue", size = 4) +
+  geom_vline(xintercept = as.numeric(max_female_date), linetype = "dotted", color = "grey", linewidth = 0.5) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme(
+    plot.title = element_text(size = 12),
+    axis.title = element_text(size = 10),  
+    axis.text = element_text(size = 8)    
+  ) +
+  coord_cartesian(clip = "off")
 
 ```
 
-The graph illustrates the total number of deaths among Toronto female shelter residents from 2007 to 2024, showing an increasing trend over time. Key observations include:
+From the above 2 graphs illustrates the total number of deaths among Toronto male and female shelter residents from 2007 to 2024. Both graphs follow the same pattern as the number of total deaths. I have not included a seperate graphs on Others since the data is composed of many N/A and it is only a small proportion of the entire dataset. By comparing the 2 graphs, we can see that male shelter residents have a higher mortality compared to female shelter residents. During the first phase, we could still see volatility in the 1st phase. However, the number of deaths in female shelter's residents are more flat compared to the male and overall decedents. Especially in 2012 to 2013, where the number of female shelter's residents remained 0 for the entire year. During the pandemic, male residents shelter spiked to a maximum of 16 deaths in October 2021. Female residents shelter has a much lower mortality compared to male, with a maximum of only 5 deaths per several months starting in 2020 to 2022. From both of the graphs, male shelter residents' plot matches the overall plot more closely compared to the female's plot. This could be due to the numbers of death in male outcome female and the percentage of male in shelter residents is also greater than female in shelter residents. Overall, from the trenline and both graph's trend, it shows clear evidence an increase in deaths among shelter residents during the COVID-19 pandemic.  
 
-The overall graph has similar pattern to the total numbers of deaths and it has spiked significantly in 2022. Female shelter residents seems to be greater than male compared to the last graph. This could suggest that during COVID-19 and post COVID-19, female shelter residents have a higher chance of death. We could also spot a recurring trend in some of the months of a year, which could be interesting to analysis. 
-
-The trendline (blue line) further confirms the long-term upward trajectory, with an acceleration in death counts from 2020, likely driven by pandemic-related factors such as increased health risks, inadequate shelter conditions, or reduced access to healthcare during the pandemic. The shading around the line shows the confidence interval, which suggests that the pattern observed is statistically significant.
-
-This graphical analysis highlights a considerable increase in deaths among shelter residents during and following the COVID-19 pandemic, aligning with the hypothesis that the pandemic significantly impacted mortality in this population.
-Total Deaths of Toronto female Shlter Residents from 2007 to 2024.
-
-# Discussion
-
-The analysis of the "Deaths of Shelter Residents" dataset reveals a significant increase in mortality rates among shelter residents in Toronto following 2020. This upward trend may reflect the compounded effects of various factors, including the COVID-19 pandemic, which exacerbated existing vulnerabilities such as mental health issues, substance abuse, and access to healthcare. The pandemic's impact likely intensified the challenges faced by homeless populations, including increased social isolation, reduced access to support services, and heightened risks of exposure to the virus. Additionally, systemic issues such as housing instability, economic hardship, and inadequate social safety nets may have contributed to this alarming rise in deaths. This data underscores the urgent need for targeted interventions and policy reforms to address the complex needs of this vulnerable population and improve their overall health and well-being.
-
-
-## Weaknesses and next steps
-
-The cause of total deaths of shelter residents is unknown, so we do not know for sure if the deaths is caused by COVID-19 only. If we could have a data that has the cause of deaths would give us more confidence in our testing. 
 
 \newpage
 
+# Discussion {#sec-discussion}
+
+## Limitation {#sec-discussion-limitation}
+
+The analysis of "Deaths of Shelter Residents " dataset reveals a significant increase trend in mortality rates among shelter residents in Toronto during the pandemic. One limitation of this analysis could be the tracking of deaths number in shelters. Sometimes, this population might not always be able to have a spot in shelters and could wonder near the shelters. If a death occurred, Toronto Public Health might not be accurately report the number of deaths in that specific month. In addition, the dataset might also have gaps or inconsistencies during certain time periods, which could limit our ability to make a observation or judgement. 
 
 
-# References
+## Suggestion for Future Step {#sec-discussion-suggestion}
+
+For future consideration, it would be much more helpful to expand the analysis by combining other important datasets. For instance, the demographics of homeless population and shelters in Toronto, the cause of deaths in homeless population, or the population of shelter residents compared with Toronto overall population could all be helpful to identify our underlying assumptions. Lastly, we were able to observe a cyclic trend during in our graph. It would be a great if we could model the trend into a time series model. This could help warn the public health institution for a cycle of peaks in shelter residents mortality rate and prepare for any upcoming disaster. 
+
+\newpage
+
+# Appendix {#sec-appendix}
+
+## Dataset and Graph Sketches {#sec-appendix-sketches}
+
+Sketches depicting in this analysis are available in the GitHub Repository.
+
+## Data Cleaning {#sec-appendix-cleaning}
+
+The data cleaning process involved renaming column names and creating new variables from the raw dataset for clarity and simplicity. 
+
+
+\newpage
+
+# References {#sec-reference}
 
 
